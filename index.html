@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Document</title>
+     <!-- CSS -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+     <!-- JS -->
+     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>  
+     <script>
+        const app=angular.module('admini',['ngRoute'])
+        app.controller('adminController',function($scope){
+            $scope.pages=[
+                {
+                    name:'home',
+                    href:'#/!'
+                },
+                {
+                    name:'adduser',
+                    href:'#!adduser'
+                },
+                {
+                    name:'userView',
+                    href:'#!userview'
+                }
+            ]
+        })
+
+        app.config(function($routeProvider){
+            $routeProvider
+            .when('/',
+            {
+                templateUrl:'home.html',
+                controller:'homeController'
+
+            })
+            .when('/adduser',
+            {
+              templateUrl:'addUser.html',
+              controller:'addUserController'
+            })
+            .when('/userview',
+            {
+              templateUrl:'userView.html',
+              controller:'userViewController'
+            })
+        })
+
+
+        app.controller('homeController',function($scope){
+            $scope.PAGENAME='HOME PAGE'
+        })
+        app.controller('addUserController',function($scope,$http){
+            $scope.PAGENAME='add user page'
+            $scope.formObject={}
+            $scope.save=function(informationForFrom){
+                informationForFrom.insert=1
+                var config={
+                        headers:{
+                            'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+                        }
+                    }  
+                    $http.post('api.php',informationForFrom,config).then(response=>{
+                        $scope.resp=response.data
+                    })      
+            }
+        })
+
+        app.controller('userViewController',function($scope,$http,$window){
+            $scope.PAGENAME='user view page'
+
+        $http.get('api.php?userView=1').then(response=>{
+            $scope.userviews=response.data
+        }).catch(err=>{
+            console.log(err)
+        })
+         
+        $scope.orderby=function(orderbyClause){
+            $scope.orderBy=orderbyClause
+        }
+
+        let arrayForDelete=[]
+        $scope.show=undefined
+        $scope.formObject={}
+        $scope.alert=function(ID){
+            $scope.show=ID
+            var config={
+                        headers:{
+                            'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+                        }
+                    }  
+            $http.post('api.php',{editID:ID},config).then(response =>{
+                $scope.formObject.NAME=response.data[0].NAME
+                $scope.formObject.PASSWORD=response.data[0].PASSWORD
+                $scope.formObject.idForUpdate=response.data[0].ID
+            })    
+        }
+
+         $scope.saveChanges=function(editData){
+            var config={
+                        headers:{
+                            'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+                        }
+                    }
+             $http.post('api.php',editData,config).then(response =>{
+                if(response.data =='edited'){
+                    $window.location.href='#!userview'
+                }
+             })
+         }
+
+         $scope.checked=function(ID){
+            if(arrayForDelete.includes(ID)){
+                var index=arrayForDelete.indexOf(ID)
+                arrayForDelete.splice(index,1)
+            }else{
+                arrayForDelete.push(ID)
+            }
+            $scope.remove=function(){
+                var deletes={}
+                deletes.delete=1
+                deletes.forDelete=arrayForDelete
+                var config={
+                        headers:{
+                            'Content-Type':'application/x-www-form-urlencoded; charset=utf-8'
+                        }
+                    }
+                    $http.post('api.php',deletes,config).then(response=>{
+                        if(response.data=='deleted'){
+                            $window.location.href='#!userview'
+                        }
+                    })
+            }
+         }
+
+        })
+     </script>
+    </head>
+<body ng-app="admini" ng-controller="adminController">
+    <nav>
+        <div ng-repeat="page in pages"><a class="nav-a" href="{{page.href}}">{{page.name}}</a></div>
+    </nav>
+    <section>
+        <div class="page-name" ng-view></div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,35 @@
+nav{
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    height: 150px;
+    align-items: center;
+   
+}
+.nav-a{
+    color: grey;
+    font-size: 40px;
+    text-decoration: none;
+}
+.nav-a:hover{
+   cursor: pointer;
+   color: rgb(213, 205, 205);
+} 
+
+.page-name{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    
+}
+
+.add-form{
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+
+}
